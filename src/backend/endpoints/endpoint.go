@@ -12,6 +12,7 @@ import (
 
 type Endpoints struct {
 	GetNumericals    endpoint.Endpoint
+	GetSchemas       endpoint.Endpoint
 	GetCacheData     endpoint.Endpoint
 	GetFrameSolution endpoint.Endpoint
 }
@@ -19,6 +20,7 @@ type Endpoints struct {
 func CreateEndpoints(s logic.APIService, lg log.Logger) Endpoints {
 	es := Endpoints{}
 	es.GetNumericals = MakeGetNumericalsEndpoint(s, lg)
+	es.GetSchemas = makeGetSchemas(s, lg)
 	es.GetCacheData = makeGetCacheData(s, lg)
 	es.GetFrameSolution = makeGetFrameSolution(s, lg)
 	return es
@@ -55,5 +57,14 @@ func makeGetFrameSolution(s logic.APIService, lg log.Logger) endpoint.Endpoint {
 		return data, nil
 	}
 	e = util.LoggingMiddleware(lg, "get solution")(e)
+	return e
+}
+
+func makeGetSchemas(s logic.APIService, lg log.Logger) endpoint.Endpoint {
+	e := func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		data := s.GetSchemas(ctx)
+		return data, nil
+	}
+	e = util.LoggingMiddleware(lg, "get schemas")(e)
 	return e
 }

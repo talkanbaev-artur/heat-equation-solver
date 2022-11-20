@@ -44,6 +44,15 @@ func MakeMuxRoutes(s logic.APIService, r *mux.Router, lg *logrus.Logger) {
 		),
 	)
 
+	r.Methods("GET").Path("/schemas").Handler(
+		transp.NewServer(
+			ends.GetSchemas,
+			decodeGetNumericalsRequest,
+			encodeResponse,
+			options...,
+		),
+	)
+
 	r.Methods("POST").Path("/initial").Handler(
 		transp.NewServer(
 			ends.GetCacheData,
