@@ -10,6 +10,7 @@ type Numericals struct {
 type CacheData struct {
 	OriginalX  []float64 `json:"xOriginal"`
 	NumericalX []float64 `json:"xNumer"`
+	TimePoints []float64 `json:"timePoints"`
 }
 
 type SolutionFrame struct {

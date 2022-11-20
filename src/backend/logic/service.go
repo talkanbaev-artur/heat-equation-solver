@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/logic/algorithms"
 	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/logic/functions"
 	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/logic/model"
 )
@@ -38,7 +39,12 @@ func (s service) GetSchemas(ctx context.Context) []model.Schema {
 }
 
 func (s service) GetCacheableData(ctx context.Context, p model.SolutionParameters) model.CacheData {
-	return model.CacheData{}
+	data := model.CacheData{}
+	data.NumericalX = algorithms.GenerateUniformGrid(p.NumericalGridSize)
+	data.OriginalX = algorithms.GenerateUniformGrid(50000)
+	tau := algorithms.GetTimeGridStep(p)
+	data.TimePoints = algorithms.GenerateGrid(p.TimePoints, tau*float64(p.TimePoints))
+	return data
 }
 
 func (s service) GetSolution(ctx context.Context, p model.SolutionParameters, timePoint float64) model.SolutionFrame {
