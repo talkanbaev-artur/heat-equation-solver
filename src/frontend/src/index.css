@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+
+    .anim {
+        @apply transform-gpu ease-in-out duration-500 transition-all;
+    }
+
+    .ctrl-button {
+        @apply  hover:text-green-800 anim hover:scale-110;
+    }
+}
