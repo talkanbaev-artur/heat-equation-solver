@@ -23,7 +23,6 @@ func main() {
 	lg := logrus.New()
 	config.Init()
 
-	//REPLACE BY REAL SERVICE
 	s := logic.NewAPIService()
 
 	r := mux.NewRouter()
