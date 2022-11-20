@@ -1,4 +1,4 @@
-module github.com/talkanbaev-artur/auca-numericals-template
+module github.com/talkanbaev-artur/heat-equation-solver
 
 go 1.18
 

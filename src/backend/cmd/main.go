@@ -6,15 +6,16 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
-	"github.com/talkanbaev-artur/auca-numericals-template/src/backend/config"
-	"github.com/talkanbaev-artur/auca-numericals-template/src/backend/logic"
-	"github.com/talkanbaev-artur/auca-numericals-template/src/backend/server"
+	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/config"
+	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/logic"
+	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/server"
 )
 
 func main() {
@@ -26,7 +27,10 @@ func main() {
 	s := logic.NewAPIService()
 
 	r := mux.NewRouter()
-	server.MakeMuxRoutes(s, r, lg)
+	server.MakeMuxRoutes(s, r.PathPrefix("/api").Subrouter(), lg)
+	path, _ := os.Getwd()
+	path = filepath.Join(path, "frontend")
+	server.AttachSPA(r, path, "index.html")
 	go func() {
 		c := cors.New(cors.Options{AllowedOrigins: []string{"*"}, AllowedMethods: []string{"POST", "GET", "OPTIONS"}})
 		srv := http.Server{
@@ -48,7 +52,7 @@ func main() {
 		cancel()
 	}()
 
-	lg.Info("Initialised numericals application")
+	lg.Info("Initialised heat equation solver application")
 	<-ctx.Done()
 	lg.Info("Shutting down...")
 }

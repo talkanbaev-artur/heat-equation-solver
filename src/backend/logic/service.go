@@ -3,11 +3,13 @@ package logic
 import (
 	"context"
 
-	"github.com/talkanbaev-artur/auca-numericals-template/src/backend/logic/model"
+	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/logic/model"
 )
 
 type APIService interface {
 	GetNumericals(ctx context.Context) []model.Numericals
+	GetCacheableData(ctx context.Context, p model.SolutionParameters) model.CacheData
+	GetSolution(ctx context.Context, p model.SolutionParameters, timePoint float64) model.SolutionFrame
 }
 
 func NewAPIService() APIService {
@@ -23,4 +25,12 @@ func (s service) GetNumericals(ctx context.Context) []model.Numericals {
 	}
 
 	return nums
+}
+
+func (s service) GetCacheableData(ctx context.Context, p model.SolutionParameters) model.CacheData {
+	return model.CacheData{}
+}
+
+func (s service) GetSolution(ctx context.Context, p model.SolutionParameters, timePoint float64) model.SolutionFrame {
+	return model.SolutionFrame{}
 }
