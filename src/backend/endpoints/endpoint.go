@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/log"
+	"github.com/google/uuid"
 	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/logic"
 	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/logic/model"
 	"github.com/talkanbaev-artur/heat-equation-solver/src/backend/util"
@@ -46,6 +47,7 @@ func makeGetCacheData(s logic.APIService, lg log.Logger) endpoint.Endpoint {
 }
 
 type GetFrameSolutionInput struct {
+	ParamsID  uuid.UUID                `json:"id"`
 	Params    model.SolutionParameters `json:"params"`
 	TimePoint float64                  `json:"t"`
 }
@@ -53,7 +55,7 @@ type GetFrameSolutionInput struct {
 func makeGetFrameSolution(s logic.APIService, lg log.Logger) endpoint.Endpoint {
 	e := func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		p := request.(GetFrameSolutionInput)
-		data := s.GetSolution(ctx, p.Params, p.TimePoint)
+		data := s.GetSolution(ctx, p.Params, p.TimePoint, p.ParamsID)
 		return data, nil
 	}
 	e = util.LoggingMiddleware(lg, "get solution")(e)
