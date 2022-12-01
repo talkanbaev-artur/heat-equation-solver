@@ -49,7 +49,7 @@ func makeGetCacheData(s logic.APIService, lg log.Logger) endpoint.Endpoint {
 type GetFrameSolutionInput struct {
 	ParamsID  uuid.UUID                `json:"id"`
 	Params    model.SolutionParameters `json:"params"`
-	TimePoint float64                  `json:"t"`
+	TimePoint int                      `json:"t"`
 }
 
 func makeGetFrameSolution(s logic.APIService, lg log.Logger) endpoint.Endpoint {

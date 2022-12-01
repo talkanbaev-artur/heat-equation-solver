@@ -14,16 +14,21 @@ type APIService interface {
 	GetNumericals(ctx context.Context) []model.Numericals
 	GetSchemas(ctx context.Context) []model.Schema
 	GetCacheableData(ctx context.Context, p model.SolutionParameters) model.CacheData
-	GetSolution(ctx context.Context, p model.SolutionParameters, timePoint float64, id uuid.UUID) model.SolutionFrame
+	GetSolution(ctx context.Context, p model.SolutionParameters, t int, id uuid.UUID) model.SolutionFrame
 }
 
 func NewAPIService() APIService {
-	return &service{dataCache: make(map[uuid.UUID]model.CacheData), processingData: make(map[uuid.UUID]model.SolutionFrame)}
+	return &service{dataCache: make(map[uuid.UUID]model.CacheData), processingData: make(map[procID]model.SolutionFrame)}
 }
 
 type service struct {
 	dataCache      map[uuid.UUID]model.CacheData
-	processingData map[uuid.UUID]model.SolutionFrame
+	processingData map[procID]model.SolutionFrame
+}
+
+type procID struct {
+	paramsId  uuid.UUID
+	timePoint int
 }
 
 func (s *service) GetNumericals(ctx context.Context) []model.Numericals {
@@ -53,14 +58,19 @@ func (s *service) GetCacheableData(ctx context.Context, p model.SolutionParamete
 	return data
 }
 
-func (s *service) GetSolution(ctx context.Context, p model.SolutionParameters, timePoint float64, id uuid.UUID) model.SolutionFrame {
-	if timePoint == 0 {
-		task := functions.GetTask(p.TaskID)(p.Eps, timePoint)
-		c := s.dataCache[id]
-		var res model.SolutionFrame
+func (s *service) GetSolution(ctx context.Context, p model.SolutionParameters, t int, id uuid.UUID) model.SolutionFrame {
+	c := s.dataCache[id]
+	timePoint := c.TimePoints[t]
+	task := functions.GetTask(p.TaskID)(p.Eps, timePoint)
+	var res model.SolutionFrame
+	res.Original = functions.EvaluateOriginal(c.OriginalX, task.Theta)
+	if t == 0 {
 		res.Numerical = functions.EvaluateOriginal(c.NumericalX, task.Theta)
-		res.Original = functions.EvaluateOriginal(c.OriginalX, task.Theta)
+		s.processingData[procID{paramsId: id, timePoint: t}] = res
 		return res
 	}
-	return model.SolutionFrame{}
+	prev := s.processingData[procID{paramsId: id, timePoint: t - 1}]
+	res.Numerical = algorithms.Solve(p, timePoint, prev.Numerical)
+	s.processingData[procID{paramsId: id, timePoint: t}] = res
+	return res
 }
