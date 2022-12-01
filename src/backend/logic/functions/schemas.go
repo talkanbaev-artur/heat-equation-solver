@@ -7,7 +7,9 @@ import (
 )
 
 var Schemas = map[int]model.Schema{
+	1: {ID: 1, Name: "Явная схема", Value: func(k float64) float64 { return 0 }},
 	2: {ID: 2, Name: "Схема Кранка-Николсона", Value: crancNikolsonScheme},
+	3: {ID: 3, Name: "Схема с опережением", Value: func(k float64) float64 { return 1 }},
 	4: {ID: 4, Name: "Схема с минимальной вязкостью", Value: minimalViscosityScheme},
 	5: {ID: 5, Name: "Схема, сохраняющая монотонность", Value: preservingScheme},
 	6: {ID: 6, Name: "Схема наивысшего порядка сходимости", Value: highestOrderScheme},
