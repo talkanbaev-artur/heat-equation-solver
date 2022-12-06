@@ -18,7 +18,7 @@ func Solve(p model.SolutionParameters, timePoint float64, prevVals []float64) []
 	B0 := 1 - A0 - A0
 
 	for i := 1; i < n-1; i++ {
-		a[i], b[i], c[i] = A, B, A
+		a[i], b[i], c[i] = -A, B, -A
 		f[i] = A0*prevVals[i-1] + B0*prevVals[i] + A0*prevVals[i+1]
 	}
 	solution, _ := solveTridiagonal(a, b, c, f)

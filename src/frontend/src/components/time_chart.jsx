@@ -73,7 +73,12 @@ function TimePlot(initialDatasets, timePoints, updateDataFunc) {
     const [data, setData] = useState({ datasets: initialDatasets });
 
     useEffect(() => {
-        setData({ datasets: updateDataFunc(cur) });
+        const func = async () => {
+            var data = await updateDataFunc(cur);
+            setData({ datasets: data });
+        }
+        func()
+        return () => { }
     }, [cur])
 
     const upCur = useCallback(
@@ -82,16 +87,19 @@ function TimePlot(initialDatasets, timePoints, updateDataFunc) {
                 var min = Math.min(...timePoints),
                     max = Math.max(...timePoints);
                 val += 1;
+                if (!isFinite(val) || !isFinite(min) || !isFinite(max)) {
+                    return 1;
+                }
                 if (val < min) {
-                    return (min);
+                    return min;
                 } else if (val > max) {
-                    setCur(max);
+                    return max;
                 } else {
-                    setCur(val);
+                    return val
                 }
             })
         },
-        [cur],
+        [cur, timePoints],
     );
 
     useEffect(() => {
@@ -106,6 +114,10 @@ function TimePlot(initialDatasets, timePoints, updateDataFunc) {
         }
     }, [cur, play]);
 
+    useEffect(() => {
+        setCur(1);
+    }, [timePoints]);
+
 
     const updateCur = (val) => {
         var min = Math.min(...timePoints),
@@ -114,8 +126,10 @@ function TimePlot(initialDatasets, timePoints, updateDataFunc) {
             setCur(min);
         } else if (val > max) {
             setCur(max);
+        } else if (!isFinite(val) || val == Infinity || val == -Infinity) {
+            setCur(1);
         } else {
-            setCur(val);
+            setCur(val)
         }
     }
 
@@ -132,7 +146,7 @@ function TimePlot(initialDatasets, timePoints, updateDataFunc) {
                     <button className="ctrl-button" onClick={() => { updateCur(Infinity) }}>{TbPlayerSkipForward()}</button>
                 </div>
                 {cur}
-                <div name="points" className="flex mx-auto space-x-2 items-center">
+                <div name="points" className="flex flex-wrap mx-auto space-x-2 items-center">
                     <span>Time Points:</span>
                     {timePoints.map(e => (
                         PlotPoint(e, e == cur, () => { setCur(e) })

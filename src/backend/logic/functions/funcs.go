@@ -39,13 +39,21 @@ func sol1(phi0, phi1, eps float64) model.D2RF {
 func createProblem1(eps, t float64) model.Task {
 	phi1 := constF(1)(t)
 	phi0 := constF(1)(t)
-	return model.Task{ID: 1, Name: "Prolbem 1", Phi0: constF(1), Phi1: constF(1), Theta: theta1(phi0, phi1)}
+	return model.Task{ID: 1, Name: "Prolbem 1", Phi0: constF(1), Phi1: constF(1), Theta: theta1(phi0, phi1), Solution: sol1(phi0, phi1, eps)}
 }
 
 func EvaluateOriginal(grid []float64, f model.RF) []float64 {
 	var res []float64
 	for _, v := range grid {
 		res = append(res, f(v))
+	}
+	return res
+}
+
+func EvaluateOriginal2D(grid []float64, f model.D2RF, point float64) []float64 {
+	var res []float64
+	for _, v := range grid {
+		res = append(res, f(v, point))
 	}
 	return res
 }

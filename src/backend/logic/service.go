@@ -48,9 +48,12 @@ func (s *service) GetSchemas(ctx context.Context) []model.Schema {
 }
 
 func (s *service) GetCacheableData(ctx context.Context, p model.SolutionParameters) model.CacheData {
+	if p.NumericalGridSize == 0 || p.Eps == 0 {
+		return model.CacheData{OriginalX: []float64{}, NumericalX: []float64{}, TimePoints: []float64{}}
+	}
 	data := model.CacheData{ID: uuid.New()}
 	data.NumericalX = algorithms.GenerateUniformGrid(p.NumericalGridSize)
-	data.OriginalX = algorithms.GenerateUniformGrid(50000)
+	data.OriginalX = algorithms.GenerateUniformGrid(500)
 	tau := algorithms.GetTimeGridStep(p)
 	timePoints := int(math.Round(p.TimeMax/tau)) + 1
 	data.TimePoints = algorithms.GenerateGrid(timePoints, p.TimeMax)
@@ -59,17 +62,27 @@ func (s *service) GetCacheableData(ctx context.Context, p model.SolutionParamete
 }
 
 func (s *service) GetSolution(ctx context.Context, p model.SolutionParameters, t int, id uuid.UUID) model.SolutionFrame {
-	c := s.dataCache[id]
+	emp := model.SolutionFrame{Original: []float64{}, Numerical: []float64{}}
+	if p.Eps == 0 || p.NumericalGridSize == 0 {
+		return emp
+	}
+	c, ok := s.dataCache[id]
+	if !ok {
+		return emp
+	}
 	timePoint := c.TimePoints[t]
 	task := functions.GetTask(p.TaskID)(p.Eps, timePoint)
 	var res model.SolutionFrame
-	res.Original = functions.EvaluateOriginal(c.OriginalX, task.Theta)
+	res.Original = functions.EvaluateOriginal2D(c.OriginalX, task.Solution, timePoint)
 	if t == 0 {
 		res.Numerical = functions.EvaluateOriginal(c.NumericalX, task.Theta)
 		s.processingData[procID{paramsId: id, timePoint: t}] = res
 		return res
 	}
-	prev := s.processingData[procID{paramsId: id, timePoint: t - 1}]
+	prev, ok := s.processingData[procID{paramsId: id, timePoint: t - 1}]
+	if !ok {
+		return emp
+	}
 	res.Numerical = algorithms.Solve(p, timePoint, prev.Numerical)
 	s.processingData[procID{paramsId: id, timePoint: t}] = res
 	return res
