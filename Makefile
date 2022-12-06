@@ -1,8 +1,8 @@
-NAME=template
-VERSION=0.0.0
+NAME=heat-solver
+VERSION=0.1.0
 
-TARGET_OS=linux windows darwin
-TARGET_ARCH=amd64 arm64 386 arm
+TARGET_OS=linux windows # darwin
+TARGET_ARCH=amd64 # arm64 386 arm
 
 DOCKER_PREFIX=
 
